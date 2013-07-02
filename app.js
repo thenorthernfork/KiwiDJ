@@ -70,7 +70,7 @@ var app = express();
 
 // all environments
 app.engine('ejs', engine);
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || config.port);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 app.use(express.favicon());

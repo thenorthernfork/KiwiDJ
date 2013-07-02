@@ -1,3 +1,4 @@
 module.exports = {
-	secret: ""//Session Secret Message
+	secret: "",//Session Secret Message
+	port: 3000
 }
