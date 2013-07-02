@@ -1,4 +1,4 @@
-<img src="/tree/master/public/images/logo.png" style="float:right">
+<img src="public/images/logo.png" style="float:right">
 KiwiDJ
 ======
 
