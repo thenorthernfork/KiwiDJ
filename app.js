@@ -23,7 +23,6 @@ function findById(id, fn) {
 			fn(null, row);
 		}else{
 			fn(null, null);
-			console.log("Couldn't find ID!");
 		}
 	});
 }
@@ -62,6 +61,11 @@ passport.use(new LocalStrategy(
 	}
 ));
 
+function isLoggedIn(req, res, next) {
+  if (req.isAuthenticated()) { return next(); }
+  res.redirect('/login')
+}
+
 var app = express();
 
 // all environments
@@ -87,13 +91,17 @@ if ('development' == app.get('env')) {
 
 app.get('/', routes.index);
 app.get('/login', function(req, res){
-	res.render('login', { title: 'KiwiDJ - Login' });
+	res.render('login', { title: 'KiwiDJ - Login', user: req.user });
 });
 app.post('/login', passport.authenticate('local', { failureRedirect: '/login'}), function(req, res) {
     res.redirect('/');
 });
-app.get('/:id/create', room.create);
-app.get('/:id', room.join);
+app.get('/logout', function(req, res){
+	req.logout();
+	res.redirect('/');
+});
+app.get('/:id/create', isLoggedIn, room.create);
+app.get('/:id', isLoggedIn, room.join);
 
 var io = require('socket.io').listen(app.listen(app.get('port')), function(){
 	console.log('Express server listening on port ' + app.get('port'));

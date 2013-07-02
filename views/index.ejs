@@ -1,3 +1,7 @@
 <% layout('layout') -%>
 <h1>Home</h1>
-<p>Welcome to <%= title %></p>
+<% if(typeof user == 'undefined') { %>
+	<p>Please log in</p>
+<% } else { %>
+	<p>Welcome <%= user.username %>!</p>
+<% } %> 
