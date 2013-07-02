@@ -1,0 +1,26 @@
+body, html{
+  height:100%;
+  margin: 0px;
+}
+
+#sideBar {
+	height: 100%;
+	width: 200px;
+	float: right;
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	background-color:#A3A2A2;
+	margin-right: 15px;
+}
+
+#chat {
+	overflow: auto;
+	height: 96%;
+	width: 100%;
+}
+
+#chatSpacer {
+	width: 100%;
+	height: 2%;
+}

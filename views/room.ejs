@@ -11,20 +11,23 @@
 		  <script src="javascripts/html5shiv.js"></script>
 		<![endif]-->
 		<script src="/javascripts/jquery.min.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="http://connect.soundcloud.com/sdk.js"></script>
+		<script>var roomName = '<%= room %>';</script>
+		<script src="/javascripts/room.js"></script>
 		<script src="/javascripts/bodyFade.js"></script>
 
 		<!-- styles -->
-		<link href="/stylesheets/style.css" rel="stylesheet">
-		<link href="/stylesheets/font-awesome.min.css" rel="stylesheet">
+		<link href="/stylesheets/room.css" rel="stylesheet">
 	</head>
 	<body>
-		<div class="header">
-			<div class="content">
-				<h1><i class="icon-headphones"></i> KiwiDJ</h1>
-			</div>
+		<div id="player"></div>
+		<div id="sideBar">
+		<div id="chatSpacer"></div>
+		<div id="chat">
+			<div>Swagga Swag!</div>
+			<div>Swoggo Swog!</div>
 		</div>
-		<div class="content">
-			<%- body %>
 		</div>
 	</body>
 </html>
