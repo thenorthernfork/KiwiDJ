@@ -18,13 +18,40 @@
 		<link href="/stylesheets/font-awesome.min.css" rel="stylesheet">
 	</head>
 	<body>
-		<div class="header">
-			<div class="content">
-				<h1><i class="icon-headphones"></i> KiwiDJ</h1>
+		<div class="bodyDiv">
+			<div class="header">
+				<div class="headerDiv borderRight">
+					<img src="/images/logo-512.png" width="64px" height="64px" align="left"/>
+					<h1>KiwiDJ</h1>
+					<a href="/"></a>
+				</div>
+				<div class="headerUser">
+					<% if(typeof user == 'undefined') { %>
+						<a href="/login">Login</a> | <a href="/register">Register</a>
+					<% } else { %>
+						Logged in as <strong><%= user.username %></strong> | <a href="/logout">Logout</a>
+					<% } %> 
+				</div>
+				<div class="headerDiv borderRight">
+					<h1><i class="icon-headphones"></i> Rooms</h1>
+					<a href="/"></a>
+				</div>
+				<div class="headerDiv borderRight">
+					<h1><i class="icon-male"></i> Users</h1>
+					<a href="/"></a>
+				</div>
+				<div class="headerDiv borderRight">
+					<h1><i class="icon-thumbs-up-alt"></i> Stats</h1>
+					<a href="/"></a>
+				</div>
+				<div class="headerDiv" style="width:19.6%">
+					<h1><i class="icon-question"></i> About</h1>
+					<a href="/"></a>
+				</div>				
 			</div>
-		</div>
-		<div class="content">
-			<%- body %>
+			<div id="content">
+				<%- body %>
+			</div>
 		</div>
 	</body>
 </html>

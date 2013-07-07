@@ -94,14 +94,27 @@ app.get('/login', function(req, res){
 	res.render('login', { title: 'KiwiDJ - Login', user: req.user });
 });
 app.post('/login', passport.authenticate('local', { failureRedirect: '/login'}), function(req, res) {
-    res.redirect('/');
+	res.redirect('/');
 });
 app.get('/logout', function(req, res){
 	req.logout();
 	res.redirect('/');
 });
-app.get('/:id/create', isLoggedIn, room.create);
-app.get('/:id', isLoggedIn, room.join);
+app.get('/register', function(req, res){
+	res.render('register', { title: 'KiwiDJ - Register'});
+});
+app.post('/register', function(req,res){
+	var reg = reg;
+	if(req.body.password == req.body.passwordconfirm){
+		db.get("SELECT * FROM users WHERE username=?",req.body.username, function(err, row) {
+			if(!row && !err){
+				console.log("Creating user "+req.body.username);
+			}
+		});
+	}
+});
+app.get('/:id/create'/*, isLoggedIn*/, room.create);
+app.get('/:id'/*, isLoggedIn*/, room.join);
 
 var io = require('socket.io').listen(app.listen(app.get('port')), function(){
 	console.log('Express server listening on port ' + app.get('port'));
