@@ -14,7 +14,7 @@ var express = require('express')
 global.rooms = new HashMap();
 
 //set up SQLite DB
-db.run("create table if not exists users(id INTEGER PRIMARY KEY, username TEXT, password TEXT, email TEXT)");
+db.run("create table if not exists users(id INTEGER PRIMARY KEY, username TEXT, password TEXT, email TEXT, sessionId TEXT)");
 db.run("create table if not exists rooms(id INTEGER PRIMARY KEY, name TEXT, ownerid INTEGER)");
 
 function findById(id, fn) {
@@ -90,6 +90,15 @@ if ('development' == app.get('env')) {
 }
 
 app.get('/', routes.index);
+app.get('/rooms', function(req, res){
+	res.render('rooms', { title: 'KiwiDJ - Rooms', user: req.user });
+});
+app.get('/stats', function(req, res){
+	res.render('stats', { title: 'KiwiDJ - Statistics', user: req.user });
+});
+app.get('/about', function(req, res){
+	res.render('about', { title: 'KiwiDJ - About', user: req.user });
+});
 app.get('/login', function(req, res){
 	res.render('login', { title: 'KiwiDJ - Login', user: req.user });
 });
@@ -104,12 +113,16 @@ app.get('/register', function(req, res){
 	res.render('register', { title: 'KiwiDJ - Register'});
 });
 app.post('/register', function(req,res){
-	var reg = reg;
+	var reg = req;
 	if(req.body.password == req.body.passwordconfirm){
 		db.get("SELECT * FROM users WHERE username=?",req.body.username, function(err, row) {
 			if(!row && !err){
-				console.log("Creating user "+req.body.username);
+				console.log("Creating user "+reg.body.username);
+				db.run("INSERT INTO users VALUES (NULL, ?, ?, ?, NULL)", reg.body.username, reg.body.password, reg.body.email);
+				res.redirect("/login");
+				return;
 			}
+			res.redirect('/register');
 		});
 	}
 });

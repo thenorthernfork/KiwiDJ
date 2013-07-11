@@ -7,7 +7,7 @@ body {
 	margin-left:auto;
 	margin-right:auto;
 	width:1000px;
-	min-height:600px;
+	/*min-height:600px;*/
 	background: #FFFFFF;
 	-webkit-border-radius: 25px;
 	-moz-border-radius: 25px;
@@ -16,7 +16,7 @@ body {
 
 .header {
 	width:100%;
-	height:128px;
+	height:50px;
 	border-bottom:1px solid #000;
 }
 
@@ -37,7 +37,7 @@ body {
 }
 
 .headerDiv img {
-	margin-top: 32px;/* Hacky as hell*/
+	margin-left: 10px;
 }
 
 .headerDiv a {
@@ -49,20 +49,20 @@ body {
 }
 
 .headerUser {
-	vertical-align: top;
 	border-left:1px solid #000;
+	border-right:1px solid #000;
 	border-bottom:1px solid #000;
 	display: table;
-	float:right;
 	padding:8px;
-	-webkit-border-top-right-radius: 25px;
 	-webkit-border-bottom-left-radius: 25px;
-	-moz-border-radius-topright: 25px;
+	-webkit-border-bottom-right-radius: 25px;
 	-moz-border-radius-bottomleft: 25px;
-	border-top-right-radius: 25px;
+	-moz-border-radius-bottomright: 25px;
 	border-bottom-left-radius: 25px;
-	position: relative;
-	margin-bottom: -100%;
+	border-bottom-right-radius: 25px;
+	margin-bottom: -20px;
+	margin-left: auto;
+	margin-right: auto;
 	background-color: #FFFFFF;
 	z-index: 1;
 }
@@ -71,6 +71,17 @@ body {
 	border-right:1px solid #000;
 }
 
+.center {
+	margin-left: auto;
+	margin-right: auto;
+	display: table;
+}
+
 #content {
+	padding:15px;
+	padding-top:0px;
+}
+
+#footer {
 	padding:15px;
 }

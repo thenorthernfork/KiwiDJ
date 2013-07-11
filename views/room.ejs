@@ -1,33 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title><%= title %></title>
-		<meta name="description" content="">
-		<meta name="author" content="">
-
-		<!-- HTML5 shim, for IE6-8 support of HTML elements -->
-		<!--[if lt IE 9]>
-		  <script src="javascripts/html5shiv.js"></script>
-		<![endif]-->
-		<script src="/javascripts/jquery.min.js"></script>
-		<script src="/socket.io/socket.io.js"></script>
-		<script src="http://connect.soundcloud.com/sdk.js"></script>
-		<script>var roomName = '<%= room %>';</script>
-		<script src="/javascripts/room.js"></script>
-		<script src="/javascripts/bodyFade.js"></script>
-
-		<!-- styles -->
-		<link href="/stylesheets/room.css" rel="stylesheet">
-	</head>
-	<body>
-		<div id="player"></div>
-		<div id="sideBar">
-		<div id="chatSpacer"></div>
-		<div id="chat">
-			<div>Swagga Swag!</div>
-			<div>Swoggo Swog!</div>
-		</div>
-		</div>
-	</body>
-</html>
+<% layout('layout') -%>
+<script src="/socket.io/socket.io.js"></script>
+<script src="http://connect.soundcloud.com/sdk.js"></script>
+<script>var roomName = '<%= room %>';</script>
+<script src="/javascripts/room.js"></script>
+<h1>SOUNDCLOUD MUSIC</h1>

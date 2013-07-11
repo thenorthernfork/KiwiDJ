@@ -8,7 +8,7 @@
 
 		<!-- HTML5 shim, for IE6-8 support of HTML elements -->
 		<!--[if lt IE 9]>
-		  <script src="javascripts/html5shiv.js"></script>
+		  <script src="/javascripts/html5shiv.js"></script>
 		<![endif]-->
 		<script src="/javascripts/jquery.min.js"></script>
 		<script src="/javascripts/bodyFade.js"></script>
@@ -20,38 +20,41 @@
 	<body>
 		<div class="bodyDiv">
 			<div class="header">
+				<div class="headerDiv borderRight" style="width:19.8%">
+					<h1><i class="icon-headphones"></i> Rooms</h1>
+					<a href="/rooms"></a>
+				</div>
 				<div class="headerDiv borderRight">
-					<img src="/images/logo-512.png" width="64px" height="64px" align="left"/>
+					<h1><i class="icon-dashboard"></i> Stats</h1>
+					<a href="/stats"></a>
+				</div>
+				<div class="headerDiv borderRight">
+					<img src="/images/logo-512.png" width="50px" height="50px" align="left"/>
 					<h1>KiwiDJ</h1>
 					<a href="/"></a>
 				</div>
-				<div class="headerUser">
-					<% if(typeof user == 'undefined') { %>
-						<a href="/login">Login</a> | <a href="/register">Register</a>
-					<% } else { %>
-						Logged in as <strong><%= user.username %></strong> | <a href="/logout">Logout</a>
-					<% } %> 
-				</div>
 				<div class="headerDiv borderRight">
-					<h1><i class="icon-headphones"></i> Rooms</h1>
-					<a href="/"></a>
-				</div>
-				<div class="headerDiv borderRight">
-					<h1><i class="icon-male"></i> Users</h1>
-					<a href="/"></a>
-				</div>
-				<div class="headerDiv borderRight">
-					<h1><i class="icon-thumbs-up-alt"></i> Stats</h1>
-					<a href="/"></a>
-				</div>
-				<div class="headerDiv" style="width:19.6%">
 					<h1><i class="icon-question"></i> About</h1>
-					<a href="/"></a>
+					<a href="/about"></a>
+				</div>
+				<div class="headerDiv" style="width:19.8%">
+					<h1><i class="icon-github"></i> Github</h1>
+					<a href="http://github.com/medsouz/KiwiDJ"></a>
 				</div>				
+			</div>
+			<div class="headerUser">
+				<% if(typeof user == 'undefined') { %>
+					<a href="/login">Login</a> | <a href="/register">Register</a>
+				<% } else { %>
+					Logged in as <strong><%= user.username %></strong> | <i class="icon-envelope"></i> 0 new messages | <i class="icon-male"></i> 0 friends online | <i class="icon-signout"></i> <a href="/logout">Logout</a>
+				<% } %> 
 			</div>
 			<div id="content">
 				<%- body %>
 			</div>
+			<p id="footer">
+				medsouz 2013			
+			</p>
 		</div>
 	</body>
 </html>
