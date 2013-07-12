@@ -11,13 +11,20 @@ var express = require('express')
 	, sqlite3 = require('sqlite3').verbose()
 	, db = new sqlite3.Database('kiwi.db')
 	, HashMap = require('hashmap').HashMap
-	, GitInfo = require('GitInfo');
+	, GitInfo = require('GitInfo')
+	, crypto = require("crypto");
 
 global.rooms = new HashMap();
 
 GitInfo.getHEAD(function(HEAD){global.gitHEAD = HEAD});
 var contributors;
-GitInfo.getContributors(function(con){contributors = con}, GitInfo.NAME);
+GitInfo.getContributors(function(con){
+	for(var x = 0; x < con.length; x++){
+		con[x][2] = crypto.createHash("md5").update(con[x][1]).digest("hex");
+		console.log(con[x][2]);
+	}	
+	contributors = con
+}, GitInfo.NAME_AND_EMAIL);
 
 //set up SQLite DB
 db.run("create table if not exists users(id INTEGER PRIMARY KEY, username TEXT, password TEXT, email TEXT, sessionId TEXT)");
