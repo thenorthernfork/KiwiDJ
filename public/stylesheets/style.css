@@ -44,9 +44,9 @@ p {
 
 .headerDiv h1 {
 	display: table-cell;
-    vertical-align: middle;
-    text-align:center;
-    font-family: "Lucida Console", Monaco, monospace;
+	vertical-align: middle;
+	text-align:center;
+	font-family: "Lucida Console", Monaco, monospace;
 }
 
 .headerDiv img {
@@ -55,11 +55,11 @@ p {
 }
 
 .headerDiv a {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    left: 0;
-    top: 0;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	left: 0;
+	top: 0;
 }
 
 .headerUser {
@@ -79,6 +79,13 @@ p {
 	margin-right: auto;
 	background-color: #FFFFFF;
 	z-index: 1;
+}
+
+.contributor {
+	float:left;
+	display: table;
+	position: relative;
+	margin: 5px;
 }
 
 .roomBox {

@@ -21,7 +21,6 @@ var contributors;
 GitInfo.getContributors(function(con){
 	for(var x = 0; x < con.length; x++){
 		con[x][2] = crypto.createHash("md5").update(con[x][1]).digest("hex");
-		console.log(con[x][2]);
 	}	
 	contributors = con
 }, GitInfo.NAME_AND_EMAIL);

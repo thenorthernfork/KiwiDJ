@@ -7,12 +7,14 @@
 <h3>Contributors</h3>
 <p>The following people have provided commits to the repository that made this current version of KiwiDJ a reality. Thank you!
 <marquee>
+<div>
 <% for(var x = 0; x < contributors.length; x++) { %>
-	<div>	
+	<div class="contributor">	
 		<img style="width:90px; height: 90px" src="http://www.gravatar.com/avatar/<%= contributors[x][2] %>?d=404&size=90"/>
-		<span class="center"><%= contributors[x][0] %><span>
-	<div>
+		<span class="center"><%= contributors[x][0] %></span>
+	</div>
 <% } %>
+</div>
 </marquee>
 <span style="font-size: 0.7em">This list is automatically generated.</span>
 </p>
