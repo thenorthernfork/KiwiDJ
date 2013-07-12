@@ -66,7 +66,7 @@ passport.use(new LocalStrategy(
 			findByUsername(username, function(err, user) {
 			if (err) { return done(err); }
 			if (!user) { return done(null, false, { message: 'Unknown user ' + username }); }
-			if (user.password != password) { return done(null, false, { message: 'Invalid password' }); }
+			if (user.password != crypto.createHash("md5").update(password).digest("hex")) { return done(null, false, { message: 'Invalid password' }); }
 			return done(null, user);
 			})
 		});
@@ -128,7 +128,7 @@ app.post('/register', function(req,res){
 		db.get("SELECT * FROM users WHERE username=?",req.body.username, function(err, row) {
 			if(!row && !err){
 				console.log("Creating user "+reg.body.username);
-				db.run("INSERT INTO users VALUES (NULL, ?, ?, ?, NULL)", reg.body.username, reg.body.password, reg.body.email);
+				db.run("INSERT INTO users VALUES (NULL, ?, ?, ?, NULL)", reg.body.username, crypto.createHash("md5").update(reg.body.password).digest("hex"), reg.body.email);
 				res.redirect("/login");
 			}else{
 				res.redirect('/register');
