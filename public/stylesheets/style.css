@@ -3,6 +3,19 @@ body {
 	background-color: #121212;
 }
 
+h1 {
+	margin-top: 0px;
+}
+
+ul {
+	padding-left: 20px;
+	margin: 0px;
+}
+
+p {
+	margin: 0px;
+}
+
 .bodyDiv {
 	margin-left:auto;
 	margin-right:auto;
@@ -38,6 +51,7 @@ body {
 
 .headerDiv img {
 	margin-left: 10px;
+	margin-top: 1px;
 }
 
 .headerDiv a {
@@ -60,11 +74,21 @@ body {
 	-moz-border-radius-bottomright: 25px;
 	border-bottom-left-radius: 25px;
 	border-bottom-right-radius: 25px;
-	margin-bottom: -20px;
+	margin-bottom: 0px;
 	margin-left: auto;
 	margin-right: auto;
 	background-color: #FFFFFF;
 	z-index: 1;
+}
+
+.roomBox {
+	height:100px;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	border:1px solid #000;
+	padding:5px;
+	display: inline-block;
 }
 
 .borderRight {
@@ -77,11 +101,36 @@ body {
 	display: table;
 }
 
+.right {
+	float: right;
+}
+
+.left {
+	float: left;
+}
+
+.bottom {
+	vertical-align: bottom;
+}
+
+.noMargin {
+	margin: 0px;
+}
+
+.scrollY {
+	overflow-x:hidden;
+	overflow-y:scroll;
+}
+
 #content {
 	padding:15px;
 	padding-top:0px;
 }
 
 #footer {
+	border-top:1px solid #000;
 	padding:15px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	margin-top: 0px;
 }

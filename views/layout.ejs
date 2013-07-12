@@ -3,8 +3,8 @@
 	<head>
 		<meta charset="utf-8">
 		<title><%= title %></title>
-		<meta name="description" content="">
-		<meta name="author" content="">
+		<meta name="description" content="KiwiDJ lets you DJ for your friends or strangers online. Play music from sources like Soundcloud and Youtube to a group.">
+		<meta name="author" content="medsouz">
 
 		<!-- HTML5 shim, for IE6-8 support of HTML elements -->
 		<!--[if lt IE 9]>
@@ -29,7 +29,7 @@
 					<a href="/stats"></a>
 				</div>
 				<div class="headerDiv borderRight">
-					<img src="/images/logo-512.png" width="50px" height="50px" align="left"/>
+					<img src="/images/logo.png" width="44px" height="49px" align="left"/>
 					<h1>KiwiDJ</h1>
 					<a href="/"></a>
 				</div>
@@ -44,7 +44,7 @@
 			</div>
 			<div class="headerUser">
 				<% if(typeof user == 'undefined') { %>
-					<a href="/login">Login</a> | <a href="/register">Register</a>
+					<i class="icon-signin"></i> <a href="/login">Login</a> | <i class="icon-user"></i> <a href="/register">Register</a>
 				<% } else { %>
 					Logged in as <strong><%= user.username %></strong> | <i class="icon-envelope"></i> 0 new messages | <i class="icon-male"></i> 0 friends online | <i class="icon-signout"></i> <a href="/logout">Logout</a>
 				<% } %> 
@@ -53,7 +53,8 @@
 				<%- body %>
 			</div>
 			<p id="footer">
-				medsouz 2013			
+				medsouz 2013
+				<span class="right">Git HEAD: <%= gitHEAD %><span>
 			</p>
 		</div>
 	</body>

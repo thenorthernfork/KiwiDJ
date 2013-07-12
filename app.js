@@ -1,6 +1,7 @@
 var express = require('express')
 	, routes = require('./routes')
 	, room = require('./routes/room')
+	, stats = require('./routes/stats')
 	, http = require('http')
 	, path = require('path')
 	, engine = require('ejs-locals')
@@ -9,9 +10,14 @@ var express = require('express')
 	, config = require('./config')
 	, sqlite3 = require('sqlite3').verbose()
 	, db = new sqlite3.Database('kiwi.db')
-	, HashMap = require('hashmap').HashMap;
+	, HashMap = require('hashmap').HashMap
+	, GitInfo = require('GitInfo');
 
 global.rooms = new HashMap();
+
+GitInfo.getHEAD(function(HEAD){global.gitHEAD = HEAD});
+var contributors;
+GitInfo.getContributors(function(con){contributors = con}, GitInfo.NAME);
 
 //set up SQLite DB
 db.run("create table if not exists users(id INTEGER PRIMARY KEY, username TEXT, password TEXT, email TEXT, sessionId TEXT)");
@@ -93,11 +99,9 @@ app.get('/', routes.index);
 app.get('/rooms', function(req, res){
 	res.render('rooms', { title: 'KiwiDJ - Rooms', user: req.user });
 });
-app.get('/stats', function(req, res){
-	res.render('stats', { title: 'KiwiDJ - Statistics', user: req.user });
-});
+app.get('/stats', stats.view);
 app.get('/about', function(req, res){
-	res.render('about', { title: 'KiwiDJ - About', user: req.user });
+	res.render('about', { title: 'KiwiDJ - About', user: req.user, contributors: contributors });
 });
 app.get('/login', function(req, res){
 	res.render('login', { title: 'KiwiDJ - Login', user: req.user });
@@ -110,7 +114,7 @@ app.get('/logout', function(req, res){
 	res.redirect('/');
 });
 app.get('/register', function(req, res){
-	res.render('register', { title: 'KiwiDJ - Register'});
+	res.render('register', { title: 'KiwiDJ - Register', user: req.user });
 });
 app.post('/register', function(req,res){
 	var reg = req;
@@ -120,14 +124,14 @@ app.post('/register', function(req,res){
 				console.log("Creating user "+reg.body.username);
 				db.run("INSERT INTO users VALUES (NULL, ?, ?, ?, NULL)", reg.body.username, reg.body.password, reg.body.email);
 				res.redirect("/login");
-				return;
+			}else{
+				res.redirect('/register');
 			}
-			res.redirect('/register');
 		});
 	}
 });
-app.get('/:id/create'/*, isLoggedIn*/, room.create);
-app.get('/:id'/*, isLoggedIn*/, room.join);
+app.get('/:id/create', isLoggedIn, room.create);
+app.get('/:id', isLoggedIn, room.join);
 
 var io = require('socket.io').listen(app.listen(app.get('port')), function(){
 	console.log('Express server listening on port ' + app.get('port'));
