@@ -1,6 +1,23 @@
 <% layout('layout') -%>
-<strong>Heap Usage</strong>: <%= heap %>
-<br>
+<script type="text/javascript" src="/javascripts/jquery.easy-pie-chart.js"></script>
+<link rel="stylesheet"type="text/css" href="/stylesheets/jquery.easy-pie-chart.css">
+<div class="center">
+<div class="center" style="display:table">
+	<strong class="center">Heap Usage</strong>
+	<div class="chart" data-percent="<%= heap[1] %>"><%= Math.round(heap[1]) %>%</div>
+	<script type="text/javascript">
+	$(function() {
+	    $('.chart').easyPieChart({
+	        //your configuration goes here
+	        lineWidth: 15,
+	        barColor: "#006600"
+	    });
+	});
+	</script>
+	<span class="center"><%= heap[0] %></span> 
+</div>
+<hr>
 <strong>Uptime</strong>: <%= uptime %>
-<br>
+<hr>
 <strong>NodeJS Version</strong>: <%= nodeVersion %>
+</div>
