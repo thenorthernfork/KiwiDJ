@@ -11,7 +11,7 @@ var express = require('express')
 	, sqlite3 = require('sqlite3').verbose()
 	, db = new sqlite3.Database('kiwi.db')
 	, HashMap = require('hashmap').HashMap
-	, GitInfo = require('GitInfo')
+	, GitInfo = require('gitinfo')
 	, crypto = require("crypto");
 
 global.rooms = new HashMap();
@@ -78,6 +78,11 @@ function isLoggedIn(req, res, next) {
   res.redirect('/login')
 }
 
+function isNotLoggedIn(req, res, next) {
+  if (!req.isAuthenticated()) { return next(); }
+  res.redirect('/')
+}
+
 var app = express();
 
 // all environments
@@ -109,7 +114,7 @@ app.get('/stats', stats.view);
 app.get('/about', function(req, res){
 	res.render('about', { title: 'KiwiDJ - About', user: req.user, contributors: contributors });
 });
-app.get('/login', function(req, res){
+app.get('/login', isNotLoggedIn, function(req, res){
 	res.render('login', { title: 'KiwiDJ - Login', user: req.user });
 });
 app.post('/login', passport.authenticate('local', { failureRedirect: '/login'}), function(req, res) {
@@ -119,7 +124,7 @@ app.get('/logout', function(req, res){
 	req.logout();
 	res.redirect('/');
 });
-app.get('/register', function(req, res){
+app.get('/register', isNotLoggedIn, function(req, res){
 	res.render('register', { title: 'KiwiDJ - Register', user: req.user });
 });
 app.post('/register', function(req,res){
