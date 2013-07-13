@@ -11,8 +11,8 @@ var express = require('express')
 	, sqlite3 = require('sqlite3').verbose()
 	, db = new sqlite3.Database('kiwi.db')
 	, HashMap = require('hashmap').HashMap
-	, GitInfo = require('gitinfo')
-	, crypto = require("crypto");
+	, GitInfo = require('gitinfojs')
+	, crypto = require("crypto")
 
 global.rooms = new HashMap();
 
