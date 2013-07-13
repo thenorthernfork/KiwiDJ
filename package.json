@@ -1,5 +1,5 @@
 {
-  "name": "KiwiDJ",
+  "name": "kiwidj",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -14,7 +14,7 @@
     "passport": "~0.1.17",
     "passport-local": "~0.1.6",
     "sqlite3": "~2.1.10",
-    "gitinfo": "~0.1.1"
+    "gitinfo": "0.0.2"
   },
   "author": "medsouz"
 }
