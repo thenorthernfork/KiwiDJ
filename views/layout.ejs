@@ -44,16 +44,16 @@
 			</div>
 			<div class="headerUser">
 				<% if(typeof user == 'undefined') { %>
-					<i class="icon-signin"></i> <a href="/login">Login</a> | <i class="icon-user"></i> <a href="/register">Register</a>
+					<span><i class="icon-signin"></i> <a href="/login">Login</a> | <i class="icon-user"></i> <a href="/register">Register</a></span>
 				<% } else { %>
-					Logged in as <strong><%= user.username %></strong> | <i class="icon-envelope"></i> 0 new messages | <i class="icon-male"></i> 0 friends online | <i class="icon-signout"></i> <a href="/logout">Logout</a>
+					<span>Logged in as <strong><%= user.username %></strong> | <i class="icon-envelope"></i> 0 new messages | <i class="icon-male"></i> 0 friends online | <i class="icon-signout"></i> <a href="/logout">Logout</a></span>
 				<% } %> 
 			</div>
 			<div id="content">
 				<%- body %>
 			</div>
 			<p id="footer">
-				medsouz 2013
+				<span>medsouz 2013</span>
 				<span class="right">Git HEAD: <a href="https://github.com/medsouz/KiwiDJ/commit/<%= gitHEAD %>"><%= gitHEAD %></a><span>
 			</p>
 		</div>
