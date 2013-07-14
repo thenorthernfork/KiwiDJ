@@ -1,10 +1,22 @@
+@font-face {
+	font-family: Gotham;
+	src: url('/font/GothamHTF-Black.otf');
+}
+
 body {
 	background-image: url("/images/bg.png");
 	background-color: #121212;
+	font-family: 'Open Sans', sans-serif;
+}
+
+a {
+	color: #2e741e;
+	text-decoration: none;
 }
 
 h1 {
 	margin-top: 0px;
+	font-family: Gotham, arial;
 }
 
 ul {
@@ -21,7 +33,7 @@ p {
 	margin-right:auto;
 	width:1000px;
 	/*min-height:600px;*/
-	background: #FFFFFF;
+	background: #f2f2f2;
 	-webkit-border-radius: 25px;
 	-moz-border-radius: 25px;
 	border-radius: 25px;
@@ -46,7 +58,9 @@ p {
 	display: table-cell;
 	vertical-align: middle;
 	text-align:center;
-	font-family: "Lucida Console", Monaco, monospace;
+	text-transform: uppercase;
+	letter-spacing: -2px;
+	font-size: 40px;
 }
 
 .headerDiv img {
@@ -77,7 +91,6 @@ p {
 	margin-bottom: 0px;
 	margin-left: auto;
 	margin-right: auto;
-	background-color: #FFFFFF;
 	z-index: 1;
 }
 
@@ -86,6 +99,12 @@ p {
 	display: table;
 	position: relative;
 	margin: 5px;
+}
+
+#contributors {
+	overflow-x: auto;
+	overflow-y: hidden;
+	white-space: nowrap;
 }
 
 .roomBox {

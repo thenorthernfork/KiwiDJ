@@ -6,8 +6,8 @@
 <p>We are currently looking for people who would like to contribute to the project. This is medsouz's first experience in web development and he is probably doing a lot of things wrong. Any corrections or contributions would be appreciated on the <i class="icon-github"></i> <a href="http://github.com/medsouz/KiwiDJ">Github page</a>.</p>
 <h3>Contributors</h3>
 <p>The following people have provided commits to the repository that made this current version of KiwiDJ a reality. Thank you!
-<marquee style="display:block;">
-<div>
+<div id="contributors">
+<div style="float:left;">
 <% for(var x = 0; x < contributors.length; x++) { %>
 	<div class="contributor">	
 		<img style="width:90px; height: 90px" src="http://www.gravatar.com/avatar/<%= contributors[x][2] %>?d=404&size=90"/>
@@ -15,7 +15,16 @@
 	</div>
 <% } %>
 </div>
-</marquee>
+</div>
+<script>
+$('#contributors').each(function(){
+	if($(this)[0].scrollWidth>$(this).outerWidth()){
+		var scroll = $(this)[0].scrollWidth-$(this).outerWidth();
+		$(this).scrollLeft(0);
+		$(this).animate({scrollLeft:scroll},scroll*75,'linear');
+	}
+});
+</script>
 <span style="font-size: 0.7em">This list is automatically generated.</span>
 </p>
 <h3>Special Thanks</h3>
