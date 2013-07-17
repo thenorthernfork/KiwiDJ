@@ -17,6 +17,8 @@ function setAudioDetails(title, artist, album){
 function stopMusic(){
 	if(sc_playing !== "undefined"){
 		sc_playing.stop();
+		sc_playing.destroy();
+		sc_playing = "undefined";
 		$("#canvas").animate({"width": "1px"}, "slow").animate({"height": "1px"}, "slow")
 	}
 	if(yt_player !== "undefined"){
@@ -35,17 +37,25 @@ function onYouTubePlayerReady(id) {
 	console.log("yt loaded");
 }
 
+function getYoutubeInfo(videoid, callback){
+	$.getJSON("https://gdata.youtube.com/feeds/api/videos/"+videoid+"?v=2&alt=json", callback);
+}
+
 function playYoutube(videoID){
 	stopMusic();
 	$("#ytwrapper").animate({"width": "870px"}, "slow").animate({"height": "512px"}, "slow")
 	yt_player.loadVideoById(videoID, 0);
 	yt_player.playVideo();
-	console.log("PLAYING YT");
 	$('#source').text("Youtube");
 	$('#source').attr("href","http://www.youtube.com/watch?v="+videoID);
 	$('#source-icon').removeClass();
 	$('#source-icon').addClass("icon-youtube");
+	$('#album').attr('src', "https://i1.ytimg.com/vi/"+videoID+"/mqdefault.jpg")
 	$('#ytwrapper').slideDown();
+	getYoutubeInfo(videoID, function(data){
+		$("#songTitle").text(data.entry.title.$t);
+		$("#songArtist").text(data.entry.author[0].name.$t);
+	});
 }
 
 function playSoundcloud(trackid){
@@ -89,11 +99,7 @@ function getSoundCloudTrackInfo(trackid, callback){
 	});
 }
 
-function swag(){
-	getSoundCloudTrackID("https://soundcloud.com/64bit-2/1-bit-earpunch", function(id){
-		playSoundcloud(id);
-	});
-}
+
 function toggleView(){
 	if($("#chatToggle").attr("value") == "Chat"){
 		$("#people").fadeOut(function(){$("#chat").fadeIn();});
@@ -141,27 +147,25 @@ $(document).ready(function() {
  		return false;
 	});
 
+	var c = document.getElementById("canvas");
+	var ctx = c.getContext("2d");
 
-///EXPERIMENTAL
-var c = document.getElementById("canvas");
-var ctx = c.getContext("2d");
-
-window.setInterval(function(){
-	ctx.canvas.width = 970;//BAD: hardcoded, find some way to convert percentage into pixels
-	ctx.canvas.height = 512;
-	if(sc_playing !== "undefined"){
-		ctx.fillStyle='#F2F2F2';
-		ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-		for (var i = 0; i < sc_playing.eqData.length; i++) {
-			var color = Math.round(sc_playing.eqData[i] * 255);
-			var w = ctx.canvas.width / sc_playing.eqData.length;
-			ctx.fillStyle='#'+color;
-			ctx.fillRect(i * w,ctx.canvas.height,w,-(sc_playing.eqData[i] * ctx.canvas.height));
+	window.setInterval(function(){
+		ctx.canvas.width = 970;//BAD: hardcoded, find some way to convert percentage into pixels
+		ctx.canvas.height = 512;
+		if(sc_playing !== "undefined"){
+			ctx.fillStyle='#F2F2F2';
+			ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+			for (var i = 0; i < sc_playing.eqData.length; i++) {
+				var color = Math.round(sc_playing.eqData[i] * 255);
+				var w = ctx.canvas.width / sc_playing.eqData.length;
+				ctx.fillStyle='#'+color;
+				ctx.fillRect(i * w,ctx.canvas.height,w,-(sc_playing.eqData[i] * ctx.canvas.height));
+			}
+			$("#duration").text(formatMilliseconds(sc_playing.position)+"/"+formatMilliseconds(sc_playing.duration));
 		}
-		$("#duration").text(formatMilliseconds(sc_playing.position)+"/"+formatMilliseconds(sc_playing.duration));
-	}
-}, 1000 / 60);
-swag()
-window.setTimeout(function(){playYoutube("kwNssgj743s");}, 50000);
-window.setTimeout(stopMusic, 60000);
+		if(yt_player !== "undefined"){
+			$("#duration").text(formatMilliseconds(yt_player.getCurrentTime() * 1000)+"/"+formatMilliseconds(yt_player.getDuration() * 1000));
+		}
+	}, 1000 / 60);
 });
