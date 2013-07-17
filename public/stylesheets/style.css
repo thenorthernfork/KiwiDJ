@@ -60,7 +60,7 @@ p {
 	text-align:center;
 	text-transform: uppercase;
 	letter-spacing: -2px;
-	font-size: 40px;
+	font-size: 35px;
 }
 
 .headerDiv img {
@@ -119,6 +119,7 @@ p {
 
 .borderRight {
 	border-right:1px solid #000;
+	margin-right: -1px;
 }
 
 .center {
