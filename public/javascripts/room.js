@@ -34,7 +34,6 @@ function stopMusic(){
 
 function onYouTubePlayerReady(id) {
 	yt_player = document.getElementById(id);
-	console.log("yt loaded");
 }
 
 function getYoutubeInfo(videoid, callback){
@@ -61,29 +60,33 @@ function playYoutube(videoID){
 function playSoundcloud(trackid){
 	stopMusic();
 	$("#canvas").animate({"width": "100%"}, "slow").animate({"height": "512px"}, "slow")
-	if(sc_playing === "undefined"){
-		SC.initialize({
-			client_id: sc_clientid
-		});
-	}
-	SC.stream("/tracks/"+trackid, {
-		useEQData: true
-	}, function(sound){
-		sc_playing = sound;
-		sound.play();
-	});
-	$('#source').text("Soundcloud");
-	$('#source-icon').removeClass();
-	$('#source-icon').addClass("icon-cloud");
 	getSoundCloudTrackInfo(trackid, function(data){
-		$('#source').attr("href", data.permalink_url);
-		if(data.artwork_url == null){
-			$('#album').attr("src", data.user.avatar_url);
+		if(data.streamable == true){
+			if(sc_playing === "undefined"){
+				SC.initialize({
+					client_id: sc_clientid
+				});
+			}
+			SC.stream("/tracks/"+trackid, {
+				useEQData: true
+			}, function(sound){
+				sc_playing = sound;
+				sound.play();
+			});
+			$('#source').text("Soundcloud");
+			$('#source-icon').removeClass();
+			$('#source-icon').addClass("icon-cloud");
+			$('#source').attr("href", data.permalink_url);
+			if(data.artwork_url == null){
+				$('#album').attr("src", data.user.avatar_url);
+			}else{
+				$('#album').attr("src", data.artwork_url);
+			}
+			$('#songTitle').text(data.title);
+			$('#songArtist').text(data.user.username);
 		}else{
-			$('#album').attr("src", data.artwork_url);
+			console.log("NOT STREAMABLE");
 		}
-		$('#songTitle').text(data.title);
-		$('#songArtist').text(data.user.username);
 	});
 }
 
@@ -149,10 +152,9 @@ $(document).ready(function() {
 
 	var c = document.getElementById("canvas");
 	var ctx = c.getContext("2d");
-
+	ctx.canvas.width = 970;//BAD: hardcoded, find some way to convert percentage into pixels
+	ctx.canvas.height = 512;
 	window.setInterval(function(){
-		ctx.canvas.width = 970;//BAD: hardcoded, find some way to convert percentage into pixels
-		ctx.canvas.height = 512;
 		if(sc_playing !== "undefined"){
 			ctx.fillStyle='#F2F2F2';
 			ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
