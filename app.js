@@ -13,6 +13,9 @@ var express = require('express')
 	, HashMap = require('hashmap').HashMap
 	, GitInfo = require('gitinfojs')
 	, crypto = require("crypto")
+	, SQLiteStore = require('connect-sqlite3')(express)
+	, socketIO = require('socket.io')
+	, passportSocketIo = require("passport.socketio");
 
 global.rooms = new HashMap();
 
@@ -26,7 +29,7 @@ GitInfo.getContributors(function(con){
 }, GitInfo.NAME_AND_EMAIL);
 
 //set up SQLite DB
-db.run("create table if not exists users(id INTEGER PRIMARY KEY, username TEXT, password TEXT, email TEXT, sessionId TEXT)");
+db.run("create table if not exists users(id INTEGER PRIMARY KEY, username TEXT, password TEXT, email TEXT)");
 db.run("create table if not exists rooms(id INTEGER PRIMARY KEY, name TEXT, ownerid INTEGER)");
 
 function findById(id, fn) {
@@ -83,6 +86,14 @@ function isNotLoggedIn(req, res, next) {
   res.redirect('/')
 }
 
+function getUserFromSocket(socket){
+	if(socket.handshake.user == null){
+		return {name: "Guest "+Math.floor((Math.random()*9999)+1000), isGuest: true};
+	}else{
+		return {name: socket.handshake.user.username, isGuest: false};
+	}
+}
+
 var app = express();
 
 // all environments
@@ -95,9 +106,14 @@ app.use(express.logger('dev'));
 app.use(express.methodOverride());
 app.use(express.cookieParser());
 app.use(express.bodyParser());
-app.use(express.session({ secret: config.secret }));
+var sessionStore = new SQLiteStore;
+app.use(express.session({
+	store: sessionStore, 
+	secret: config.secret 
+}));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(express.cookieParser());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -129,31 +145,47 @@ app.get('/register', isNotLoggedIn, function(req, res){
 });
 app.post('/register', function(req,res){
 	var reg = req;
-	if(req.body.password == req.body.passwordconfirm){
-		db.get("SELECT * FROM users WHERE username=?",req.body.username, function(err, row) {
-			if(!row && !err){
-				console.log("Creating user "+reg.body.username);
-				db.run("INSERT INTO users VALUES (NULL, ?, ?, ?, NULL)", reg.body.username, crypto.createHash("md5").update(reg.body.password).digest("hex"), reg.body.email);
-				res.redirect("/login");
-			}else{
-				res.redirect('/register');
-			}
-		});
+	if(/^[a-z0-9_-]{2,15}$/.test(req.body.username)){
+		if(req.body.password == req.body.passwordconfirm){
+			db.get("SELECT * FROM users WHERE username=?",req.body.username, function(err, row) {
+				if(!row && !err){
+					console.log("Creating user "+reg.body.username);
+					db.run("INSERT INTO users VALUES (NULL, ?, ?, ?)", reg.body.username, crypto.createHash("md5").update(reg.body.password).digest("hex"), reg.body.email);
+					res.redirect("/login");
+				}else{
+					res.redirect('/register');
+				}
+			});
+		}
+	}else{
+		console.log("Username did not match regex");
+		res.redirect('/register');
 	}
 });
 app.get('/:id/create', isLoggedIn, room.create);
-app.get('/:id', isLoggedIn, room.join);
+app.get('/:id', /*isLoggedIn,*/ room.join);
 
-var io = require('socket.io').listen(app.listen(app.get('port')), function(){
+var io = socketIO.listen(app.listen(app.get('port')), function(){
 	console.log('Express server listening on port ' + app.get('port'));
 });
 
+io.set("authorization", passportSocketIo.authorize({
+	cookieParser: express.cookieParser,
+	key:          'connect.sid',
+	secret:       config.secret,
+	store:        sessionStore,
+	fail: function(data, accept) {
+		//we will allow this anyway for guests
+		accept(null, true);
+	},
+	success: function(data, accept) {
+		accept(null, true);
+	}
+}));
+
 io.sockets.on('connection', function (socket) {
-	console.log("got conn");
+	console.log("got conn from "+getUserFromSocket(socket).name);
 	//socket.emit('message', { sender: "medsouz", message: "test" });
-	socket.on('login', function (data) {
-	
-	});
 	socket.on('send', function (data) {
 		io.sockets.emit('message', data);
 	});

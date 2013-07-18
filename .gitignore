@@ -1,4 +1,5 @@
 node_modules/*
 kiwi.db
 kiwi.db-journal
+sessions.db
 *~
