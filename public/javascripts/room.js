@@ -17,7 +17,6 @@ function setAudioDetails(title, artist, album){
 function stopMusic(){
 	if(sc_playing !== "undefined"){
 		sc_playing.stop();
-		sc_playing.destroy();
 		sc_playing = "undefined";
 		$("#canvas").animate({"width": "1px"}, "slow").animate({"height": "1px"}, "slow")
 	}
@@ -113,8 +112,40 @@ function toggleView(){
 	}
 }
 
+function makeTimeStamp(){
+	var date = new Date();
+	var min = date.getMinutes().toString();
+	if(min.length < 2){
+		min = "0"+min;
+	}
+	var sec = date.getSeconds().toString();
+	if(sec.length < 2){
+		sec = "0"+sec;
+	}
+	return date.getHours()+":"+min+":"+sec;
+}
+
+var atChatBottom = true;
+
 function showMessage(sender, message){
-	$("#chat").append("<span><strong>"+sender+"</strong> "+$("</p>").text(message).html()+"</span><hr class='noMargin'>");
+	$("#chat").append("<span style=\"float: right; margin-right: 5px\">"+makeTimeStamp()+"</span><span><strong>"+sender+"</strong> "+$("</p>").text(message).html()+"</span><hr class='noMargin'>");
+	if(atChatBottom){
+		$("#chat").animate({scrollTop: $("#chat").prop("scrollHeight")}, 500);
+	}
+}
+
+function showNotification(message){
+	$("#chat").append("<span style=\"float: right; margin-right: 5px\">"+makeTimeStamp()+"</span><span><strong>*** "+$("</p>").text(message).html()+"</strong></span><hr class='noMargin'>");
+	if(atChatBottom){
+		$("#chat").animate({scrollTop: $("#chat").prop("scrollHeight")}, 500);
+	}
+}
+
+function updatePeople(data){
+	$("#people").empty();
+	for(var x = 0; x < data.length; x++){
+		$("#people").append("<span>"+data[x].name+"<span><hr class='noMargin'>");
+	}
 }
 
 function formatMilliseconds(milli){
@@ -128,26 +159,50 @@ function formatMilliseconds(milli){
 
 $(document).ready(function() {
 	var socket = io.connect(window.location.origin);
-	socket.on('connect', function(data) {
-		socket.emit('send', {sender: "medsouz", message: "test"});
+	socket.emit('joinRoom', {roomName: roomName});
+	socket.on('notification', function (data) {
+		showNotification(data);
 	});
-	socket.on('message', function (data) {
-		//alert(data.sender+": "+data.message);
-		console.log("got message");
+
+	socket.on('chat', function (data) {
+		showMessage(data.sender, data.message)
 	});
+
+	socket.on('people', function (data) {
+		updatePeople(data);
+	});
+
+	socket.on('play', function (data) {
+		if(data.type == "sc"){
+			getSoundCloudTrackID(data.url, function (id){
+				playSoundcloud(id);
+			});
+		}
+		if(data.type == "yt"){
+			playYoutube(data.url);
+		}
+	});
+
 	$("#chatToggle").click(function(){toggleView();});
 	$("#chatForm").submit(function () {
 		try{
 			var chat = $("#chatMessage").val();
 			if(chat !== ""){
-	 			console.log(chat);
-	 			showMessage("medsouz", chat);
-				$("#chatMessage").val("")
+	 			socket.emit('chat', chat);
+	 			//showMessage("medsouz", chat);
+				$("#chatMessage").val("");
 			}
 		}catch(error){
 			console.log(error);
 		}
  		return false;
+	});
+	$("#chat").scroll(function() {
+		if ($("#chat")[0].scrollHeight - $("#chat").scrollTop() == $("#chat").outerHeight()){
+			atChatBottom = true;
+		}else{
+			atChatBottom = false;
+		}
 	});
 
 	var c = document.getElementById("canvas");
@@ -167,7 +222,9 @@ $(document).ready(function() {
 			$("#duration").text(formatMilliseconds(sc_playing.position)+"/"+formatMilliseconds(sc_playing.duration));
 		}
 		if(yt_player !== "undefined"){
-			$("#duration").text(formatMilliseconds(yt_player.getCurrentTime() * 1000)+"/"+formatMilliseconds(yt_player.getDuration() * 1000));
+			if(yt_player.getPlayerState() == 1){
+				$("#duration").text(formatMilliseconds(yt_player.getCurrentTime() * 1000)+"/"+formatMilliseconds(yt_player.getDuration() * 1000));
+			}
 		}
 	}, 1000 / 60);
 });

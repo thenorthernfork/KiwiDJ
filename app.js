@@ -101,7 +101,7 @@ app.engine('ejs', engine);
 app.set('port', process.env.PORT || config.port);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
-app.use(express.favicon());
+app.use(express.favicon('public/images/favicon.ico'));
 app.use(express.logger('dev'));
 app.use(express.methodOverride());
 app.use(express.cookieParser());
@@ -109,7 +109,8 @@ app.use(express.bodyParser());
 var sessionStore = new SQLiteStore;
 app.use(express.session({
 	store: sessionStore, 
-	secret: config.secret 
+	secret: config.secret,
+	maxAge: 7 * 24 * 60 * 60 * 1000
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -145,7 +146,7 @@ app.get('/register', isNotLoggedIn, function(req, res){
 });
 app.post('/register', function(req,res){
 	var reg = req;
-	if(/^[a-z0-9_-]{2,15}$/.test(req.body.username)){
+	if(/^[a-z0-9_-]{2,15}$/.test(req.body.username.toLowerCase())){
 		if(req.body.password == req.body.passwordconfirm){
 			db.get("SELECT * FROM users WHERE username=?",req.body.username, function(err, row) {
 				if(!row && !err){
@@ -158,16 +159,14 @@ app.post('/register', function(req,res){
 			});
 		}
 	}else{
-		console.log("Username did not match regex");
+		console.log("Username did not match regex "+req.body.username.toLowerCase());
 		res.redirect('/register');
 	}
 });
 app.get('/:id/create', isLoggedIn, room.create);
 app.get('/:id', /*isLoggedIn,*/ room.join);
 
-var io = socketIO.listen(app.listen(app.get('port')), function(){
-	console.log('Express server listening on port ' + app.get('port'));
-});
+var io = socketIO.listen(app.listen(app.get('port')), {log: false});
 
 io.set("authorization", passportSocketIo.authorize({
 	cookieParser: express.cookieParser,
@@ -183,10 +182,60 @@ io.set("authorization", passportSocketIo.authorize({
 	}
 }));
 
+function getPeopleInRoom(roomName){
+	var sockets = Object.keys(io.sockets.sockets);
+	var people = [];
+	for(var x = 0; x < sockets.length; x++){
+		var sock = io.sockets.sockets[sockets[x]];
+		if(sock.room == roomName && !sock.disconnected){
+			people[x] = {name: sock.name, isGuest: sock.isGuest};
+		}else{
+			console.log(sock.name +" is in room " + sock.room + " | disconnect: " + sock.disconnected);
+		}
+	}
+	io.sockets.in(roomName).emit('people', people);
+}
+
 io.sockets.on('connection', function (socket) {
-	console.log("got conn from "+getUserFromSocket(socket).name);
+	try{
+	socket.name = getUserFromSocket(socket).name;
+	socket.isGuest = getUserFromSocket(socket).isGuest;
+	console.log("got conn from "+socket.name+" | isGuest: "+socket.isGuest+" | IP: "+socket.handshake.address.address+":"+socket.handshake.address.port);
 	//socket.emit('message', { sender: "medsouz", message: "test" });
-	socket.on('send', function (data) {
-		io.sockets.emit('message', data);
+	socket.on('joinRoom', function (data) {
+		if(!rooms.has(data.roomName)){
+			socket.disconnect();
+			console.log("Nice try!");
+		}else{
+			console.log(socket.name + " joined room "+data.roomName);
+			socket.join(data.roomName);
+			socket.room = data.roomName;
+			io.sockets.in(socket.room).emit('notification', socket.name + " has connected to " + socket.room);
+			getPeopleInRoom(socket.room);
+			socket.on('chat', function (data) {
+				if(data != null){
+					if(data.length > 4 ){
+						if(data.substring(0, 4) == "!sc "){
+							io.sockets.in(socket.room).emit('play', {type: "sc", url: data.substring(4)});
+						}
+						if(data.substring(0, 4) == "!yt "){
+							io.sockets.in(socket.room).emit('play', {type: "yt", url: data.substring(4)});
+						}
+					}
+					io.sockets.in(socket.room).emit('chat', {sender: socket.name, message: data});
+				}
+			});
+
+			socket.on('disconnect', function (data) {
+				io.sockets.in(socket.room).emit('notification', socket.name + " has disconnected");
+				getPeopleInRoom(socket.room);
+			});
+		}
 	});
+	}catch(err){
+		console.log("A user caused "+err);
+		socket.disconnect();
+	}
 });
+
+console.log("KiwiDJ Started. Running on port "+(process.env.PORT || config.port));
