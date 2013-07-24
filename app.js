@@ -15,7 +15,8 @@ var express = require('express')
 	, crypto = require("crypto")
 	, SQLiteStore = require('connect-sqlite3')(express)
 	, socketIO = require('socket.io')
-	, passportSocketIo = require("passport.socketio");
+	, passportSocketIo = require("passport.socketio")
+	, $ = require('jquery').create(null, "2.0");
 
 global.rooms = new HashMap();
 
@@ -196,6 +197,35 @@ function getPeopleInRoom(roomName){
 	io.sockets.in(roomName).emit('people', people);
 }
 
+var sc_clientid = "cb86801e08c42af49322c0a56a82c0ec";
+
+var songStart;
+var songType;
+var songURL;
+var songDuration;
+
+function playSong(socket, type, url){
+	songStart = Date.now() + 2000;//2 second buffer time sounds good to me.
+	songType = type;
+	songURL = url;
+	if(type == "sc"){
+		$.getJSON('http://api.soundcloud.com/tracks/'+url+'.json?&client_id='+sc_clientid, function(data){
+			songDuration = data.duration;
+			console.log("Timing out song in "+songDuration);
+			setTimeout(function(){console.log("Stopping song, duration over!");io.sockets.in(socket.room).emit('stop');io.sockets.in(socket.room).emit('notification', "Song has ended");}, songDuration);
+			io.sockets.in(socket.room).emit('notification', socket.name + " is now playing " + data.title + " by "+data.user.username);
+			io.sockets.in(socket.room).emit('play', {type: type, url: url, time: 0});
+		});
+	}
+}
+
+function getCurrentSong(socket){
+	if(songStart != null){
+		console.log("Starting at "+(Date.now() - songStart)+" milliseconds");
+		socket.emit('play', {type: songType, url: songURL, time: Date.now() - songStart});
+	}
+}
+
 io.sockets.on('connection', function (socket) {
 	try{
 	socket.name = getUserFromSocket(socket).name;
@@ -212,11 +242,12 @@ io.sockets.on('connection', function (socket) {
 			socket.room = data.roomName;
 			io.sockets.in(socket.room).emit('notification', socket.name + " has connected to " + socket.room);
 			getPeopleInRoom(socket.room);
+			getCurrentSong(socket);
 			socket.on('chat', function (data) {
 				if(data != null){
 					if(data.length > 4 ){
 						if(data.substring(0, 4) == "!sc "){
-							io.sockets.in(socket.room).emit('play', {type: "sc", url: data.substring(4)});
+							playSong(socket, "sc", data.substring(4));
 						}
 						if(data.substring(0, 4) == "!yt "){
 							io.sockets.in(socket.room).emit('play', {type: "yt", url: data.substring(4)});

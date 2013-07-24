@@ -1,4 +1,5 @@
 var isConnected = false;
+var songStart = 0;
 
 var sc_clientid = "cb86801e08c42af49322c0a56a82c0ec";
 var sc_playing = "undefined";
@@ -56,8 +57,9 @@ function playYoutube(videoID){
 	});
 }
 
-function playSoundcloud(trackid){
+function playSoundcloud(trackid, time){
 	stopMusic();
+	songStart = Date.now();
 	$("#canvas").animate({"width": "100%"}, "slow").animate({"height": "512px"}, "slow")
 	getSoundCloudTrackInfo(trackid, function(data){
 		if(data.streamable == true){
@@ -67,10 +69,14 @@ function playSoundcloud(trackid){
 				});
 			}
 			SC.stream("/tracks/"+trackid, {
+				flashVersion: 9,
+				preferFlash: true,
 				useEQData: true
 			}, function(sound){
 				sc_playing = sound;
-				sound.play();
+				sc_playing.play({
+					position: (Date.now() - songStart) + time
+				});
 			});
 			$('#source').text("Soundcloud");
 			$('#source-icon').removeClass();
@@ -174,14 +180,16 @@ $(document).ready(function() {
 
 	socket.on('play', function (data) {
 		if(data.type == "sc"){
-			getSoundCloudTrackID(data.url, function (id){
-				playSoundcloud(id);
-			});
+			playSoundcloud(data.url, data.time);
 		}
 		if(data.type == "yt"){
 			playYoutube(data.url);
 		}
 	});
+
+	socket.on('play', function (data) {
+		stopMusic();
+	}
 
 	$("#chatToggle").click(function(){toggleView();});
 	$("#chatForm").submit(function () {
@@ -226,5 +234,5 @@ $(document).ready(function() {
 				$("#duration").text(formatMilliseconds(yt_player.getCurrentTime() * 1000)+"/"+formatMilliseconds(yt_player.getDuration() * 1000));
 			}
 		}
-	}, 1000 / 60);
+	}, 1000 / 30);
 });
