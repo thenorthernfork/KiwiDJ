@@ -183,6 +183,10 @@ io.set("authorization", passportSocketIo.authorize({
 	}
 }));
 
+if(config.proxy_socket_fix){
+	io.set("transports", ["xhr-polling", "jsonp-polling"]);
+}
+
 function getPeopleInRoom(roomName){
 	var sockets = Object.keys(io.sockets.sockets);
 	var people = [];
