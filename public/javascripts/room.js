@@ -187,9 +187,9 @@ $(document).ready(function() {
 		}
 	});
 
-	socket.on('play', function (data) {
+	socket.on('stop', function (data) {
 		stopMusic();
-	}
+	});
 
 	$("#chatToggle").click(function(){toggleView();});
 	$("#chatForm").submit(function () {
