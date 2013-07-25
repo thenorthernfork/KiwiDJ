@@ -167,7 +167,7 @@ app.post('/register', function(req,res){
 app.get('/:id/create', isLoggedIn, room.create);
 app.get('/:id', /*isLoggedIn,*/ room.join);
 
-var io = socketIO.listen(app.listen(app.get('port')), {log: false});
+var io = socketIO.listen(app.listen(app.get('port'), config.address), {log: false});
 
 io.set("authorization", passportSocketIo.authorize({
 	cookieParser: express.cookieParser,
@@ -271,6 +271,7 @@ io.sockets.on('connection', function (socket) {
 		console.log("A user caused "+err);
 		socket.disconnect();
 	}
+
 });
 
 console.log("KiwiDJ Started. Running on port "+(process.env.PORT || config.port));
