@@ -1,6 +1,7 @@
 var express = require('express')
 	, routes = require('./routes')
 	, room = require('./routes/room')
+	, Room = require('./Room')
 	, stats = require('./routes/stats')
 	, http = require('http')
 	, path = require('path')
@@ -9,8 +10,8 @@ var express = require('express')
 	, LocalStrategy = require('passport-local').Strategy
 	, config = require('./config')
 	, sqlite3 = require('sqlite3').verbose()
+	, flash = require('connect-flash')
 	, db = new sqlite3.Database('kiwi.db')
-	, HashMap = require('hashmap').HashMap
 	, GitInfo = require('gitinfojs')
 	, crypto = require("crypto")
 	, SQLiteStore = require('connect-sqlite3')(express)
@@ -18,7 +19,7 @@ var express = require('express')
 	, passportSocketIo = require("passport.socketio")
 	, $ = require('jquery').create(null, "2.0");
 
-global.rooms = new HashMap();
+global.rooms = [];
 
 GitInfo.getHEAD(function(HEAD){global.gitHEAD = HEAD});
 var contributors;
@@ -113,6 +114,7 @@ app.use(express.session({
 	secret: config.secret,
 	maxAge: 7 * 24 * 60 * 60 * 1000
 }));
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.cookieParser());
@@ -126,16 +128,17 @@ if ('development' == app.get('env')) {
 
 app.get('/', routes.index);
 app.get('/rooms', function(req, res){
-	res.render('rooms', { title: 'KiwiDJ - Rooms', user: req.user });
+	res.render('rooms', { title: 'KiwiDJ - Rooms', user: req.user, rooms: rooms });
+	console.log(rooms);
 });
 app.get('/stats', stats.view);
 app.get('/about', function(req, res){
 	res.render('about', { title: 'KiwiDJ - About', user: req.user, contributors: contributors });
 });
 app.get('/login', isNotLoggedIn, function(req, res){
-	res.render('login', { title: 'KiwiDJ - Login', user: req.user });
+	res.render('login', { title: 'KiwiDJ - Login', user: req.user, error: req.flash('error') });
 });
-app.post('/login', passport.authenticate('local', { failureRedirect: '/login'}), function(req, res) {
+app.post('/login', passport.authenticate('local', { failureRedirect: '/login', failureFlash: true}), function(req, res) {
 	res.redirect('/');
 });
 app.get('/logout', function(req, res){
@@ -143,7 +146,7 @@ app.get('/logout', function(req, res){
 	res.redirect('/');
 });
 app.get('/register', isNotLoggedIn, function(req, res){
-	res.render('register', { title: 'KiwiDJ - Register', user: req.user });
+	res.render('register', { title: 'KiwiDJ - Register', user: req.user, error: req.flash('error') });
 });
 app.post('/register', function(req,res){
 	var reg = req;
@@ -158,13 +161,20 @@ app.post('/register', function(req,res){
 					res.redirect('/register');
 				}
 			});
+		}else{
+			req.flash('error', 'Passwords do not match');
+			res.redirect('/register');
 		}
 	}else{
-		console.log("Username did not match regex "+req.body.username.toLowerCase());
+		req.flash('error', 'Invalid username \"'+req.body.username+'\"');
 		res.redirect('/register');
 	}
 });
-app.get('/:id/create', isLoggedIn, room.create);
+app.get('/:id/create', isLoggedIn, function(req, res){
+	var room = req.params.id;
+	rooms[room] = new Room(req.params.id, req.user, io)//TODO: Make actual room creation...
+	res.render('create', { title: 'KiwiDJ - Creating '+room, user: req.user, room: room });
+});
 app.get('/:id', /*isLoggedIn,*/ room.join);
 
 var io = socketIO.listen(app.listen(app.get('port'), config.address), {log: false});
@@ -232,41 +242,43 @@ function getCurrentSong(socket){
 
 io.sockets.on('connection', function (socket) {
 	try{
-	socket.name = getUserFromSocket(socket).name;
-	socket.isGuest = getUserFromSocket(socket).isGuest;
-	console.log("got conn from "+socket.name+" | isGuest: "+socket.isGuest+" | IP: "+socket.handshake.address.address+":"+socket.handshake.address.port);
-	//socket.emit('message', { sender: "medsouz", message: "test" });
-	socket.on('joinRoom', function (data) {
-		if(!rooms.has(data.roomName)){
-			socket.disconnect();
-			console.log("Nice try!");
-		}else{
-			console.log(socket.name + " joined room "+data.roomName);
-			socket.join(data.roomName);
-			socket.room = data.roomName;
-			io.sockets.in(socket.room).emit('notification', socket.name + " has connected to " + socket.room);
-			getPeopleInRoom(socket.room);
-			getCurrentSong(socket);
-			socket.on('chat', function (data) {
-				if(data != null){
-					if(data.length > 4 ){
-						if(data.substring(0, 4) == "!sc "){
-							playSong(socket, "sc", data.substring(4));
-						}
-						if(data.substring(0, 4) == "!yt "){
-							io.sockets.in(socket.room).emit('play', {type: "yt", url: data.substring(4)});
-						}
-					}
-					io.sockets.in(socket.room).emit('chat', {sender: socket.name, message: data});
-				}
-			});
-
-			socket.on('disconnect', function (data) {
-				io.sockets.in(socket.room).emit('notification', socket.name + " has disconnected");
+		socket.name = getUserFromSocket(socket).name;
+		socket.isGuest = getUserFromSocket(socket).isGuest;
+		console.log("got conn from "+socket.name+" | isGuest: "+socket.isGuest+" | IP: "+socket.handshake.address.address+":"+socket.handshake.address.port);
+		//socket.emit('message', { sender: "medsouz", message: "test" });
+		socket.on('joinRoom', function (data) {
+			if(rooms[data.roomName] == null){
+				socket.disconnect();
+				console.log("Nice try!");
+			}else{
+				console.log(socket.name + " joined room "+data.roomName);
+				rooms[data.roomName.toLowerCase()].onUserConnect(socket);
+				/*socket.room = data.roomName;
+				io.sockets.in(socket.room).emit('notification', socket.name + " has connected to " + socket.room);
 				getPeopleInRoom(socket.room);
-			});
-		}
-	});
+				getCurrentSong(socket);*/
+				socket.on('chat', function (data) {
+					/*if(data != null){
+						if(data.length > 4 ){
+							if(data.substring(0, 4) == "!sc "){
+								playSong(socket, "sc", data.substring(4));
+							}
+							if(data.substring(0, 4) == "!yt "){
+								io.sockets.in(socket.room).emit('play', {type: "yt", url: data.substring(4)});
+							}
+						}
+						io.sockets.in(socket.room).emit('chat', {sender: socket.name, message: data});
+					}*/
+					rooms[socket.room].onChat(socket.name, data);
+				});
+
+				socket.on('disconnect', function (data) {
+					/*io.sockets.in(socket.room).emit('notification', socket.name + " has disconnected");
+					getPeopleInRoom(socket.room);*/
+					rooms[socket.room].onUserDisconnect(socket.name);
+				});
+			}
+		});
 	}catch(err){
 		console.log("A user caused "+err);
 		socket.disconnect();
