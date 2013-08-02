@@ -1,4 +1,7 @@
 <% layout('layout') -%>
+<% if (error != "") { %>
+	<span style="color:#FF0000"><i class="icon-exclamation-sign"></i> <%= error %></span>
+<% } %>
 <h1>Login</h1>
 <form action="./login" method="post">
   Username: <input type="text" name="username"><br>
