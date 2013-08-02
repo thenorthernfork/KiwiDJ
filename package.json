@@ -10,7 +10,6 @@
     "ejs": "*",
     "ejs-locals": "~1.0.2",
     "socket.io": "~0.9.16",
-    "hashmap": "~0.9.3",
     "passport": "~0.1.17",
     "passport-local": "~0.1.6",
     "sqlite3": "~2.1.10",
